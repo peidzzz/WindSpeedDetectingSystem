@@ -8,8 +8,8 @@
 #define FUNTIONCODE 0x03
 
 void WSS_Init(void);
-uint16_t CRC16_MODBUS(uint8_t *data, uint8_t datalen);
 bool WSS_CheckMSG(uint8_t *buf);
+void WSS_RequestMSG(void);
 
 #endif /* __WIND_SPEED_SENSOR_H */
 

@@ -1,5 +1,6 @@
 #include "sys.h"
 #include "usart.h"	  
+#include "crc.h"
 #include "WindSpeedSensor.h"
 
 //////////////////////////////////////////////////////////////////
@@ -28,8 +29,8 @@ int fputc(int ch, FILE *f)
 }
 #endif 
 
- 
- 
+extern bool WSS_DATAFLAG;
+
 #if EN_USART_RX   //如果使能了接收
 
 void USART1_Init(uint32_t bound)
@@ -160,7 +161,7 @@ void USART3_IRQHandler(void) //串口3中断服务程序
     {
       if(WSS_CheckMSG(USART3_RX_BUF))                      //检测到头标识是我们需要的 
       {
-        
+        WSS_DATAFLAG = true;
       } else {
         Usart3_Rx=0;                                   //不是我们需要的数据或者达到最大接收数则开始重新接收
       }
