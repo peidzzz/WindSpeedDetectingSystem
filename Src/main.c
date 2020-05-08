@@ -4,7 +4,7 @@
 #include "usart.h"
 #include "WindSpeedSensor.h"
 #include "GSM.h"
-
+#include "rtc.h"
 bool WSS_DATAFLAG;
 
 int main(void){
@@ -14,10 +14,6 @@ int main(void){
   GSM_Init();
   
   while(1){
-    /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
-    
-//    WSS_SetAlarm();
-    
     /* 向风速传感器请求数据 */
     WSS_DATAFLAG = false;
     WSS_RequestMSG();
@@ -33,6 +29,12 @@ int main(void){
 //    if(  ){ // 当存储够6个之后 将六条数据发送至上位机
 //      
 //    }
+    
+    /* 显示当前时间 */
+    
+    /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
+    delay_ms(1000);          // 延时1s，避免不必要的麻烦
+    Enter_Sleep_Mode(599); // 进入睡眠模式，599s后唤醒 
     
   }
 }
