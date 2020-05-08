@@ -57,7 +57,7 @@ u8 RTC_Init(void)
     RCC_RTCCLKCmd(ENABLE);	//使能RTC时钟
     RTC_WaitForLastTask();	//等待最近一次对RTC寄存器的写操作完成
     RTC_WaitForSynchro();		//等待RTC寄存器同步
-    RTC_ITConfig(RTC_IT_SEC|RTC_IT_ALR, ENABLE);		//使能RTC秒中断
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);		//使能RTC秒中断
     RTC_WaitForLastTask();	//等待最近一次对RTC寄存器的写操作完成
     RTC_EnterConfigMode();/// 允许配置
     RTC_SetPrescaler(32767); //设置RTC预分频的值
@@ -67,7 +67,7 @@ u8 RTC_Init(void)
   } else { //系统继续计时
 
     RTC_WaitForSynchro();	//等待最近一次对RTC寄存器的写操作完成
-    RTC_ITConfig(RTC_IT_SEC|RTC_IT_ALR, ENABLE);	//使能RTC秒中断
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);	//使能RTC秒中断
     RTC_WaitForLastTask();	//等待最近一次对RTC寄存器的写操作完成
   }
   RTC_NVIC_Config();//RCT中断分组设置
