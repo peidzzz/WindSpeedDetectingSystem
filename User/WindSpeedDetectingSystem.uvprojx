@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>STM32F103RE</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F1xx_DFP.2.3.0</PackID>
+          <PackID>Keil.STM32F1xx_DFP.1.0.5</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x10000) IROM(0x08000000,0x80000) CPUTYPE("Cortex-M3") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -184,7 +184,6 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
-            <RvdsMve>0</RvdsMve>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -338,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Src;..\Src\CMSIS\Core;..\Src\CMSIS\Device;..\Src\Hardware\STMFLASH;..\Src\Hardware\GSM;..\Src\Hardware\WindSpeedSensor;..\Src\Hardware\CRC;..\Src\STM32F10x_FWLib\inc;..\Src\System\delay;..\Src\System\sys;..\Src\System\usart;..\Src\System\rtc</IncludePath>
+              <IncludePath>..\Src;..\Src\CMSIS\Core;..\Src\CMSIS\Device;..\Src\Hardware\STMFLASH;..\Src\Hardware\GSM;..\Src\Hardware\WindSpeedSensor;..\Src\Hardware\CRC;..\Src\Hardware\LCD1602;..\Src\Hardware\GPS;..\Src\STM32F10x_FWLib\inc;..\Src\System\delay;..\Src\System\sys;..\Src\System\usart;..\Src\System\rtc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -416,6 +415,16 @@
               <FileName>crc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Hardware\CRC\crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>1602.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Hardware\LCD1602\1602.c</FilePath>
+            </File>
+            <File>
+              <FileName>gps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Hardware\GPS\gps.c</FilePath>
             </File>
           </Files>
         </Group>

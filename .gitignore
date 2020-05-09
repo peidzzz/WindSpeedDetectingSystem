@@ -3,3 +3,5 @@ User/DebugConfig/
 *.PeidzzZ
 *.bin
 /Src/System/rtc/*.orig
+*.Administrator
+*.orig

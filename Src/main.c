@@ -5,13 +5,17 @@
 #include "WindSpeedSensor.h"
 #include "GSM.h"
 #include "rtc.h"
+#include "1602.h"
+#include "gps.h"
+
 bool WSS_DATAFLAG;
 
 int main(void){
   
-  delay_init();
-  WSS_Init();
-  GSM_Init();
+  delay_init(); // 初始化延时函数
+  WSS_Init();   // 初始化风速传感器
+  GSM_Init();   // 初始化GSM模块
+  GPS_Init();   // 初始化GPS模块
   
   while(1){
     /* 向风速传感器请求数据 */
@@ -32,9 +36,10 @@ int main(void){
     
     /* 显示当前时间 */
     
-    /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
     
-    delay_ms(1000);          // 延时1s，避免不必要的麻烦
+    
+    /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
+    delay_ms(1000);        // 延时1s，避免不必要的麻烦
     Enter_Sleep_Mode(599); // 进入睡眠模式，599s后唤醒 
     
   }

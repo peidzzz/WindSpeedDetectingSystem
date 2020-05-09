@@ -17,8 +17,6 @@ typedef struct
 	vu8  week;
 }_calendar_obj;
 
-#define EnterSleepMode __WFI()
-
 extern _calendar_obj calendar;	//日历结构体
 void Enter_Standby_Mode(uint16_t Delay_s);
 void Enter_Sleep_Mode(uint16_t Delay_s);

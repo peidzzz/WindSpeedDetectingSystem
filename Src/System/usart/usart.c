@@ -3,6 +3,10 @@
 #include "crc.h"
 #include "WindSpeedSensor.h"
 
+
+u16 point1 = 0;
+
+_SaveData Save_Data;
 //////////////////////////////////////////////////////////////////
 //加入以下代码,支持printf函数,而不需要选择use MicroLIB	  
 #if 1
@@ -23,8 +27,8 @@ void _sys_exit(int x)
 //重定义fputc函数 
 int fputc(int ch, FILE *f)
 {      
-	while((USART1->SR&0X40)==0);//循环发送,直到发送完毕   
-  USART1->DR = (u8) ch;      
+	while((USART2->SR&0X40)==0);//循环发送,直到发送完毕   
+  USART2->DR = (u8) ch;      
 	return ch;
 }
 #endif 
@@ -73,6 +77,52 @@ void USART1_Init(uint32_t bound)
     USART_Cmd(USART1, ENABLE);                     //使能串口1
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); //开启串口接受中断
     USART_ClearFlag(USART1, USART_FLAG_TC);        //清除 USARTx 的待处理标志位
+}
+
+void USART2_Init(uint32_t bound)
+{
+    //GPIO端口设置
+    GPIO_InitTypeDef  GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    NVIC_InitTypeDef  NVIC_InitStructure;
+    //USART_ClockInitTypeDef USART_ClockInitStructure;
+
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);  //使能GPIOA时钟
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE); //使能USART2
+
+    //USART2_TX   GPIOA.2
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_2; //PA.2
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP; //复用推挽输出
+    GPIO_Init(GPIOA, &GPIO_InitStructure);           //初始化GPIOA.2
+    GPIO_ResetBits(GPIOA, GPIO_Pin_2);
+
+    //USART2_RX   GPIOA.3初始化
+    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_3;            //PA3
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; //浮空输入
+    GPIO_Init(GPIOA, &GPIO_InitStructure);                //初始化GPIOA.3
+
+    //Usart2 NVIC 配置
+    NVIC_InitStructure.NVIC_IRQChannel                   = USART2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;      //抢占优先级3
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 2;      //子优先级3
+    NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE; //IRQ通道使能
+    NVIC_Init(&NVIC_InitStructure);                                //根据指定的参数初始化VIC寄存器
+
+    //USART 初始化设置
+
+    USART_InitStructure.USART_BaudRate            = bound;                          //串口波特率
+    USART_InitStructure.USART_WordLength          = USART_WordLength_8b;            //字长为8位数据格式
+    USART_InitStructure.USART_StopBits            = USART_StopBits_1;               //一个停止位
+    USART_InitStructure.USART_Parity              = USART_Parity_No;                //无奇偶校验位
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //无硬件数据流控制
+    USART_InitStructure.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;  //收发模式
+
+    USART_Init(USART2, &USART_InitStructure);      //初始化串口2
+    USART_Cmd(USART2, ENABLE);                     //使能串口2
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE); //开启串口接受中断
+    USART_ClearFlag(USART2, USART_FLAG_TC);        //清除 USARTx 的待处理标志位
+
 }
 
 void USART3_Init(uint32_t bound)
@@ -144,6 +194,70 @@ void USART1_IRQHandler(void) //串口1中断服务程序
     }
   }
 }
+
+//串口2中断服务程序
+volatile uint16_t USART2_RX_STA = 0;            //接收状态标记
+uint8_t           USART2_RX_BUF[USART_REC_LEN]; //接收缓冲,最大USART_REC_LEN个字节.
+uint16_t          Usart2_Rx = 0;
+
+void USART2_IRQHandler(void)                	//串口1中断服务程序
+{
+	u8 Res;
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) 
+	{
+		Res =USART_ReceiveData(USART2);//(USART1->DR);	//读取接收到的数据
+    if(Res == '$')
+    {
+      point1 = 0;	
+    }
+    USART2_RX_BUF[point1++] = Res;
+
+    if(USART2_RX_BUF[0] == '$' && USART2_RX_BUF[4] == 'M' && USART2_RX_BUF[5] == 'C')			//确定是否收到"GPRMC/GNRMC"这一帧数据
+    {
+      if(Res == '\n')									   
+      {
+        memset(Save_Data.GPS_Buffer, 0, GPS_Buffer_Length);      //清空
+        memcpy(Save_Data.GPS_Buffer, USART2_RX_BUF, point1); 	//保存数据
+        Save_Data.isGetData = true;
+        point1 = 0;
+        memset(USART2_RX_BUF, 0, USART_REC_LEN);      //清空				
+      }	
+          
+    }
+    if(point1 >= USART_REC_LEN)
+    {
+      point1 = USART_REC_LEN;
+    }
+  }
+}
+
+u8 Hand(char *a)                   // 串口命令识别函数
+{ 
+    if(strstr((const char *)USART2_RX_BUF,a)!=NULL)
+	    return 1;
+	else
+		return 0;
+}
+
+void CLR_Buf(void)                           // 串口缓存清理
+{
+	memset(USART2_RX_BUF, 0, USART_REC_LEN);      //清空
+  point1 = 0;                    
+}
+
+void clrStruct()
+{
+	Save_Data.isGetData = false;
+	Save_Data.isParseData = false;
+	Save_Data.isUsefull = false;
+	memset(Save_Data.GPS_Buffer, 0, GPS_Buffer_Length);      //清空
+	memset(Save_Data.UTCTime, 0, UTCTime_Length);
+	memset(Save_Data.latitude, 0, latitude_Length);
+	memset(Save_Data.N_S, 0, N_S_Length);
+	memset(Save_Data.longitude, 0, longitude_Length);
+	memset(Save_Data.E_W, 0, E_W_Length);
+}
+
 
 //串口3中断服务程序
 volatile uint16_t USART3_RX_STA = 0;
