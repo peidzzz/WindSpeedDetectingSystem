@@ -2,13 +2,15 @@
 #include "stmflash.h"
 #include "delay.h"
 #include "usart.h"
+#include "rtc.h"
+
 #include "WindSpeedSensor.h"
 #include "GSM.h"
-#include "rtc.h"
 #include "1602.h"
 #include "gps.h"
 
-bool WSS_DATAFLAG;
+uint8_t StoreBuf[20] = {0};
+uint8_t SendBuf[120] = {0};
 
 int main(void){
   
@@ -16,27 +18,23 @@ int main(void){
   WSS_Init();   // 初始化风速传感器
   GSM_Init();   // 初始化GSM模块
   GPS_Init();   // 初始化GPS模块
+  LCD_Init();   // 初始化LCD1602
   
   while(1){
-    /* 向风速传感器请求数据 */
-    WSS_DATAFLAG = false;
-    WSS_RequestMSG();
-    delay_ms(200);
-    while( !WSS_DATAFLAG ){  // 等待接收数据
-      WSS_RequestMSG();
-      delay_ms(200);
-    }
+    /* 获取当前风速数据,使用lcd1602显示 */
+    PrintWSSBuffer();
     
-    /* 使用FLASH储存风速数据 满足条件后发送至上位机 */
+    /* 获取经纬度及UTC时间信息，使用lcd1602显示经纬度 */
+    ParseGPSBuffer();
+    PrintGPSBuffer();
     
-//    WindDataStorage();
-//    if(  ){ // 当存储够6个之后 将六条数据发送至上位机
-//      
+    /* 储存经纬度、时间及风速数据 */
+    // 读取当前存储序号 如果满6个则上传
+//    if(){
+//      DataStorage();
+//    } else {
+//      SendData2Center();
 //    }
-    
-    /* 显示当前时间 */
-    
-    
     
     /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
     delay_ms(1000);        // 延时1s，避免不必要的麻烦

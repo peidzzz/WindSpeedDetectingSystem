@@ -33,7 +33,7 @@ int fputc(int ch, FILE *f)
 }
 #endif 
 
-extern bool WSS_DATAFLAG;
+extern bool WSS_RECEDataFLAG;
 
 #if EN_USART_RX   //如果使能了接收
 
@@ -245,7 +245,7 @@ void CLR_Buf(void)                           // 串口缓存清理
   point1 = 0;                    
 }
 
-void clrStruct()
+void clrStruct(void)
 {
 	Save_Data.isGetData = false;
 	Save_Data.isParseData = false;
@@ -257,7 +257,6 @@ void clrStruct()
 	memset(Save_Data.longitude, 0, longitude_Length);
 	memset(Save_Data.E_W, 0, E_W_Length);
 }
-
 
 //串口3中断服务程序
 volatile uint16_t USART3_RX_STA = 0;
@@ -275,7 +274,8 @@ void USART3_IRQHandler(void) //串口3中断服务程序
     {
       if(WSS_CheckMSG(USART3_RX_BUF))                      //检测到头标识是我们需要的 
       {
-        WSS_DATAFLAG = true;
+        WSS_RECEDataFLAG = true;
+        WindSpeedData = (uint16_t)((((uint16_t)USART3_RX_BUF[3]) << 4) | (uint16_t)USART3_RX_BUF[4]);
       } else {
         Usart3_Rx=0;                                   //不是我们需要的数据或者达到最大接收数则开始重新接收
       }
