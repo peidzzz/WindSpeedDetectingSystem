@@ -172,28 +172,34 @@ volatile uint16_t USART1_RX_STA = 0;            //接收状态标记
 uint8_t           USART1_RX_BUF[USART_REC_LEN]; //接收缓冲,最大USART_REC_LEN个字节.
 uint16_t          Usart1_Rx = 0;
 
-void USART1_IRQHandler(void) //串口1中断服务程序
+void USART1_IRQHandler(void)                	//串口1中断服务程序
 {
-  if(USART_GetITStatus(USART1,USART_IT_RXNE) != RESET) //中断产生 
+	u8 Res;
+
+	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断(接收到的数据必须是0x0d 0x0a结尾)
   {
-    USART_ClearITPendingBit(USART1,USART_IT_RXNE); //清除中断标志  
-    USART1_RX_BUF[Usart1_Rx] = USART_ReceiveData(USART1);     //接收串口1数据到buff缓冲区
-    Usart1_Rx++;  
-    if(USART1_RX_BUF[0])    //如果接收到尾标识是换行符（或者等于最大接受数就清空重新接收）
+    Res =USART_ReceiveData(USART1);	//读取接收到的数据
+  
+    if((USART1_RX_STA&0x8000)==0)//接收未完成
     {
-      if(USART1_RX_BUF[0])                      //检测到头标识是我们需要的 
+      if(USART1_RX_STA&0x4000)//接收到了0x0d
       {
-        if (USART1_RX_BUF[0]) {
-          
-        } else {
-          Usart1_Rx=0;  
-        }
-      } else {
-        Usart1_Rx=0;                                   //不是我们需要的数据或者达到最大接收数则开始重新接收
+        if(Res!=0x0a)USART1_RX_STA=0;//接收错误,重新开始
+        else USART1_RX_STA|=0x8000;	//接收完成了 
       }
-    }
-  }
-}
+      else //还没收到0X0D
+      {	
+        if(Res==0x0d)USART1_RX_STA|=0x4000;
+        else
+        {
+          USART1_RX_BUF[USART1_RX_STA&0X3FFF]=Res ;
+          USART1_RX_STA++;
+          if(USART1_RX_STA>(USART_REC_LEN-1))USART1_RX_STA=0;//接收数据错误,重新开始接收	  
+        }		 
+      }
+    }   		 
+  } 
+} 
 
 //串口2中断服务程序
 volatile uint16_t USART2_RX_STA = 0;            //接收状态标记

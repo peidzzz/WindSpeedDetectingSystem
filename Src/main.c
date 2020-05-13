@@ -30,11 +30,11 @@ int main(void){
     
     /* 储存经纬度、时间及风速数据 */
     // 读取当前存储序号 如果满6个则上传
-//    if(){
-//      DataStorage();
-//    } else {
-//      SendData2Center();
-//    }
+    if(false){
+//      DataStorage();            // 不满六个则储存当前数据
+    } else {
+      sim800c_sms_send(SendBuf);  // 通过GSM模块上传数据
+    }
     
     /* 设置RTC闹钟 进入睡眠模式 以600s（10分钟）为周期唤醒 */
     delay_ms(1000);        // 延时1s，避免不必要的麻烦
