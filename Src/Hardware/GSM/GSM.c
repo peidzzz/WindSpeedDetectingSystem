@@ -47,16 +47,14 @@ u8 sim800c_send_cmd(u8 *cmd,u8 *ack,u16 waittime)
 void sim800c_sms_send(uint8_t *p1)
 {
 	u8 phonenum[11] = "15858120627"; 		//号码缓存
-	u8 timex=0;
-	u8 key=0;
 	u8 smssendsta=0;		//短信发送状态,0,等待发送;1,发送失败;2,发送成功 
-  
+  u8 p2[21] = {0};
 	while(1)
 	{
 //    sim800c_unigbk_exchange(phonebuf,p,1);				//将电话号码转换为unicode字符串
 //    sim800c_unigbk_exchange((u8*)sim800c_test_msg,p1,1);//将短信内容转换为unicode字符串.
-//    sprintf((char*)p2,"AT+CMGS=\"%s\"",p); 
-    if(sim800c_send_cmd("AT+CMGS=\"15858120627\"",">",200)==0)					//发送短信命令+电话号码
+    sprintf((char *)p2,"AT+CMGS=\"%s\"",phonenum); 
+    if(sim800c_send_cmd(p2,">",200)==0)					//发送短信命令+电话号码
     { 		 				 													 
       printf("%s",p1);		 						//发送短信内容到GSM模块
       delay_ms(90);                     //必须延时，否则不能发送短信						

@@ -3,6 +3,8 @@
 #include "1602.h"
 #include "GSM.h"
 
+extern uint8_t StoreBuf[20];
+
 void ErrorLog(int num)
 {
 	while (1)
@@ -11,7 +13,7 @@ void ErrorLog(int num)
 	}
 }
 
-void ParseGPSBuffer(void)
+uint8_t ParseGPSBuffer(void)
 {
 	char *subString;
 	char *subStringNext;
@@ -19,15 +21,13 @@ void ParseGPSBuffer(void)
 	if (Save_Data.isGetData)
 	{
 		Save_Data.isGetData = false;
-//		printf("**************\r\n");
-//		printf(Save_Data.GPS_Buffer);
-		
 		for (i = 0 ; i <= 6 ; i++)
 		{
 			if (i == 0)
 			{
 				if ((subString = strstr(Save_Data.GPS_Buffer, ",")) == NULL)
 					ErrorLog(1);	//½âÎö´íÎó
+        return 1;
 			}
 			else
 			{
@@ -58,15 +58,19 @@ void ParseGPSBuffer(void)
 				else
 				{
 					ErrorLog(2);	//½âÎö´íÎó
+          return 1;
 				}
 			}
 		}
-	}
+    return 0;
+	} else {
+    return 1;
+  }
 }
 
 void PrintGPSBuffer(void)
 {
-  uint8_t i = 0;
+  uint8_t i = 0, j = 0;
   uint8_t GPSDataDisBuf[16] = "P: 00N00'000E00'";
 	if (Save_Data.isParseData)
 	{
@@ -95,21 +99,26 @@ void PrintGPSBuffer(void)
       for(i = 0;i < 16;i++){
         lcd_char_write(i, 0, GPSDataDisBuf[i]);
       }
-//			printf("Save_Data.latitude = ");
-//			printf(Save_Data.latitude);
-//			printf("\r\n");
-
-//			printf("Save_Data.N_S = ");
-//			printf(Save_Data.N_S);
-//			printf("\r\n");
-
-//			printf("Save_Data.longitude = ");
-//			printf(Save_Data.longitude);
-//			printf("\r\n");
-
-//			printf("Save_Data.E_W = ");
-//			printf(Save_Data.E_W);
-//			printf("\r\n");
+      j = 0;
+      StoreBuf[j++] = Save_Data.UTCTime[0];
+      StoreBuf[j++] = Save_Data.UTCTime[1];
+      StoreBuf[j++] = Save_Data.UTCTime[2];
+      StoreBuf[j++] = Save_Data.UTCTime[3];
+      StoreBuf[j++] = Save_Data.UTCTime[4];
+      StoreBuf[j++] = Save_Data.UTCTime[5];
+      
+      StoreBuf[j++] = GPSDataDisBuf[3];
+      StoreBuf[j++] = GPSDataDisBuf[4];
+      StoreBuf[j++] = GPSDataDisBuf[5];
+      StoreBuf[j++] = GPSDataDisBuf[6];
+      StoreBuf[j++] = GPSDataDisBuf[7];
+      
+      StoreBuf[j++] = GPSDataDisBuf[9];
+      StoreBuf[j++] = GPSDataDisBuf[10];
+      StoreBuf[j++] = GPSDataDisBuf[11];
+      StoreBuf[j++] = GPSDataDisBuf[12];
+      StoreBuf[j++] = GPSDataDisBuf[13];
+      StoreBuf[j++] = GPSDataDisBuf[14];
 		}
 		else
 		{

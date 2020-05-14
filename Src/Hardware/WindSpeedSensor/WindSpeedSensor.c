@@ -8,6 +8,7 @@
 bool WSS_RECEDataFLAG;
 uint8_t RequestSpeedDataMessage[8] = {0}; // 读取风速数据的消息
 uint16_t WindSpeedData = 0;
+extern uint8_t StoreBuf[20];
 
 void WSS_RequestMSG_Init(uint8_t *buf){
   uint8_t offset = 0;
@@ -49,12 +50,15 @@ void PrintWSSBuffer(void){
     WSS_RequestMSG();
     delay_ms(1200);
   }
-  WSSDataDisBuf[6] = (WindSpeedData % 10) + 48; 
-  WSSDataDisBuf[4] = (WindSpeedData % 100) / 10 + 48; 
   WSSDataDisBuf[3] = (WindSpeedData / 100) + 48;
+  WSSDataDisBuf[4] = (WindSpeedData % 100) / 10 + 48; 
+  WSSDataDisBuf[6] = (WindSpeedData % 10) + 48; 
   for(i = 0;i < 16;i++){
     lcd_char_write(i, 1, WSSDataDisBuf[i]);
   }
+  StoreBuf[17] = WSSDataDisBuf[3];
+  StoreBuf[18] = WSSDataDisBuf[4];
+  StoreBuf[19] = WSSDataDisBuf[6];
 }
 
 uint16_t DataCountRead(void){

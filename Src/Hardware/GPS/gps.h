@@ -25,7 +25,7 @@ typedef struct SaveData
 } _SaveData;
 
 void ErrorLog(int num);
-void ParseGPSBuffer(void);
+uint8_t ParseGPSBuffer(void);
 void PrintGPSBuffer(void);
 void GPS_Init(void);
 
