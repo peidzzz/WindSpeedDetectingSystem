@@ -113,6 +113,6 @@ void LCD_Init(void){
     lcd_char_write(i, 0, GPSInitDisplay[i]); // P: 33N15'112E15'
   }
   for(i = 0;i < 16;i++){
-    lcd_char_write(i, 0, WSSInitDisplay[i]); // S: 112.3m/s
+    lcd_char_write(i, 1, WSSInitDisplay[i]); // S: 112.3m/s
   }
 }

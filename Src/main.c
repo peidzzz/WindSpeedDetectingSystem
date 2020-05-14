@@ -9,16 +9,18 @@
 #include "1602.h"
 #include "gps.h"
 
-uint8_t StoreBuf[20] = {0};
+uint8_t StoreBuf[20] = {0}; // 一组数据长度为20字节 风速3字节 时间6字节 定位11字节
 uint8_t SendBuf[120] = {0};
 
 int main(void){
+  
+  uint16_t count = 0;
   
   delay_init(); // 初始化延时函数
   WSS_Init();   // 初始化风速传感器
   GSM_Init();   // 初始化GSM模块
   GPS_Init();   // 初始化GPS模块
-  LCD_Init();   // 初始化LCD1602
+  LCD_Init();   // 初始化LCD1602  
   
   while(1){
     /* 获取当前风速数据,使用lcd1602显示 */
@@ -30,8 +32,13 @@ int main(void){
     
     /* 储存经纬度、时间及风速数据 */
     // 读取当前存储序号 如果满6个则上传
-    if(false){
+    count = DataCountRead();
+    if(count < 0 || count > 6){
+      count = 0;
+      DataCountWrite(&count);
 //      DataStorage();            // 不满六个则储存当前数据
+    } else if(count != 6) {
+      STMFLASH_Write(STM32FLASH_WSS_GPS_ADDRESS + count * 1024 , StoreBuf, 20);
     } else {
       sim800c_sms_send(SendBuf);  // 通过GSM模块上传数据
     }

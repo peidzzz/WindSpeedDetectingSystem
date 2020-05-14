@@ -3,6 +3,7 @@
 #include "crc.h"
 #include "1602.h"
 #include "GSM.h"
+#include "stmflash.h"
 
 bool WSS_RECEDataFLAG;
 uint8_t RequestSpeedDataMessage[8] = {0}; // 读取风速数据的消息
@@ -54,6 +55,14 @@ void PrintWSSBuffer(void){
   for(i = 0;i < 16;i++){
     lcd_char_write(i, 1, WSSDataDisBuf[i]);
   }
+}
+
+uint16_t DataCountRead(void){
+  return STMFLASH_ReadHalfWord(STM32FLASH_COUNT_ADDRESS);
+}
+
+void DataCountWrite(uint16_t *count){
+  STMFLASH_Write(STM32FLASH_COUNT_ADDRESS, count, 1);
 }
 
 void WSS_Init(void)
